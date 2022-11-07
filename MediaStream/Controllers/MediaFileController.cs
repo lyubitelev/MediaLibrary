@@ -19,7 +19,7 @@ namespace MediaStream.Controllers
 
         [HttpGet]
         [Route("GetAllVideoFiles")]
-        public async Task<IActionResult> GetAllVideoFiles(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllVideoFilesName(CancellationToken cancellationToken)
         {
             try
             {
