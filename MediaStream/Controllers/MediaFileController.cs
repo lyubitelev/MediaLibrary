@@ -23,11 +23,11 @@ namespace MediaStream.Controllers
         {
             try
             {
-                return Ok(await _mediaFileRepository.GetAllVideoFilesNameAsync(cancellationToken));
+                return Ok(await _mediaFileRepository.GetAllVideoFileInfosAsync(cancellationToken));
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Get all video files got error");
+                _logger.LogError(e, "Get all video file infos got error");
 
                 return StatusCode((int)HttpStatusCode.InternalServerError);
             }

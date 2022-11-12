@@ -1,0 +1,34 @@
+<ng-container>
+    <form class="media-form">
+        <mat-form-field class="media-full-width" appearance="fill">
+            <mat-label>Search</mat-label>
+            <input matInput>
+            <button mat-mini-fab color="basic" matSuffix>
+                <mat-icon>search</mat-icon>
+            </button>
+        </mat-form-field>
+    </form>
+
+    <mat-grid-list [cols]="breakpoint" rowHeight="600px" (window:resize)="onResize($event)">
+        <mat-grid-tile *ngFor="let mediaInfo of mediaInfos">
+            <mat-card class="media-card">
+                <mat-card-header>
+                    <mat-card-title>{{mediaInfo.name}}</mat-card-title>
+                </mat-card-header>
+                <img mat-card-image src="data:image/jpg;base64, {{mediaInfo.previewImage}}">
+                <mat-card-content>
+                    <span>{{mediaInfo.fullName}}</span>
+                    <p>{{mediaInfo.descriptions}}</p>
+                </mat-card-content>
+                <mat-card-actions align="end">
+                    <button mat-icon-button class="favorite-icon">
+                        <mat-icon>favorite</mat-icon>
+                    </button>
+                    <button mat-icon-button>
+                        <mat-icon>share</mat-icon>
+                    </button>
+                </mat-card-actions>
+            </mat-card>
+        </mat-grid-tile>
+    </mat-grid-list>
+</ng-container>

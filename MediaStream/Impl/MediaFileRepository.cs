@@ -1,4 +1,6 @@
-﻿using MediaStream.Interfaces;
+﻿using System.Net;
+using MediaStream.Interfaces;
+using MediaStream.Models;
 using Microsoft.Extensions.Options;
 
 namespace MediaStream.Impl
@@ -6,6 +8,7 @@ namespace MediaStream.Impl
     public class MediaFileRepository : IMediaFileRepository
     {
         private readonly DirectoryInfo _searchDirectory;
+        private readonly byte[] _testPreviewImage;
         private readonly IEnumerable<string> _fileExtensions = new List<string>
         {
             ".3g2",
@@ -28,6 +31,9 @@ namespace MediaStream.Impl
         public MediaFileRepository(IOptions<AppSettings> appSettings)
         {
             _searchDirectory = new DirectoryInfo(appSettings.Value.SearchDirectory!);
+
+            using var webClient = new WebClient();
+            _testPreviewImage = webClient.DownloadData("https://material.angular.io/assets/img/examples/shiba2.jpg");
         }
 
         public Task<string> GetFullPathByNameAsync(string fileName, CancellationToken cancellationToken)
@@ -43,9 +49,15 @@ namespace MediaStream.Impl
             return Task.FromResult(firstFoundFile.FullName);
         }
 
-        public Task<IEnumerable<string>> GetAllVideoFilesNameAsync(CancellationToken cancellationToken) =>
+        public Task<IEnumerable<MediaInfoDto>> GetAllVideoFileInfosAsync(CancellationToken cancellationToken) =>
             Task.FromResult(_searchDirectory.GetFiles("*.*", SearchOption.AllDirectories)
                                             .Where(x => _fileExtensions.Contains(x.Extension))
-                                            .Select(y => Path.GetFileNameWithoutExtension(y.Name)));
+                                            .Select(y => new MediaInfoDto
+                                            {
+                                                Name = Path.GetFileNameWithoutExtension(y.Name),
+                                                FullName = y.Name,
+                                                Descriptions = $"Some file description. FullName: {y.FullName}, CreationTime: {y.CreationTime}",
+                                                PreviewImage = _testPreviewImage
+                                            }));
     }
 }
