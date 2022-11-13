@@ -21,6 +21,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
+    //ToDo configure needed
     options.AddDefaultPolicy(policy =>
     {
         policy.AllowAnyHeader();
