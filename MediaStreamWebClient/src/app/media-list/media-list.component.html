@@ -8,8 +8,8 @@
             </button>
         </mat-form-field>
     </form>
-
-    <mat-grid-list [cols]="breakpoint" rowHeight="600px" (window:resize)="onResize($event)">
+    
+    <mat-grid-list [cols]="breakpoint" rowHeight="1:1.4" (window:resize)="onResize($event)">
         <mat-grid-tile *ngFor="let mediaInfo of mediaInfos">
             <mat-card class="media-card">
                 <mat-card-header>
@@ -17,16 +17,23 @@
                 </mat-card-header>
                 <img mat-card-image src="data:image/jpg;base64, {{mediaInfo.previewImage}}">
                 <mat-card-content>
-                    <span>{{mediaInfo.fullName}}</span>
-                    <p>{{mediaInfo.descriptions}}</p>
+                    <span>Имя: {{mediaInfo.fullName}}</span>
+                    <br>
+                    <span>Дата добавления: {{mediaInfo.creationTime}}</span>
                 </mat-card-content>
-                <mat-card-actions align="end">
-                    <button mat-icon-button class="favorite-icon">
-                        <mat-icon>favorite</mat-icon>
-                    </button>
-                    <button mat-icon-button>
-                        <mat-icon>share</mat-icon>
-                    </button>
+                <mat-card-actions>
+                    <div class="media-container">
+                        <button (click)="play(mediaInfo.name)" mat-stroked-button color="primary">Воспроизвести
+                            <mat-icon>play_circle_outline</mat-icon>
+                        </button>
+                        <div class="media-fill"></div>
+                        <button mat-icon-button class="favorite-icon">
+                            <mat-icon>favorite</mat-icon>
+                        </button>
+                        <button mat-icon-button>
+                            <mat-icon>share</mat-icon>
+                        </button>
+                    </div>
                 </mat-card-actions>
             </mat-card>
         </mat-grid-tile>

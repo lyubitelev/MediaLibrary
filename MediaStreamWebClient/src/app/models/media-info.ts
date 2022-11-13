@@ -1,6 +1,6 @@
 export class MediaInfoDto {
     name!: string;
     fullName!: string;
-    descriptions!: string;
+    creationTime!: Date;
     previewImage!: Uint8Array;
 }

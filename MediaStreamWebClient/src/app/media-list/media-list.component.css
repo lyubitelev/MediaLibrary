@@ -12,3 +12,11 @@
 .media-full-width {
     width: 100%;
 }
+
+.media-container {
+    display: flex;
+}
+
+.media-fill {
+    flex: 1;
+}

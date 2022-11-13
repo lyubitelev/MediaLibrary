@@ -11,7 +11,11 @@ export class ApiService {
   
   constructor(private http: HttpClient) { }
 
-  public GerAllMediaAsync(): Observable<MediaInfoDto[]> {
+  public GetAllMediaAsync(): Observable<MediaInfoDto[]> {
     return this.http.get<MediaInfoDto[]>(`${Settings.apiUrl}/MediaFile/GetAllVideoFiles`);
+  }
+
+  public GetMediaStreamUrl(fileName: string): string {
+    return `${Settings.apiUrl}/MediaStream/GetMediaStream/${decodeURIComponent(fileName)}`;
   }
 }

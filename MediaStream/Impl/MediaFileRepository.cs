@@ -32,6 +32,7 @@ namespace MediaStream.Impl
         {
             _searchDirectory = new DirectoryInfo(appSettings.Value.SearchDirectory!);
 
+            //ToDo do not forget to delete and change to something more reasonable
             using var webClient = new WebClient();
             _testPreviewImage = webClient.DownloadData("https://material.angular.io/assets/img/examples/shiba2.jpg");
         }
@@ -49,15 +50,23 @@ namespace MediaStream.Impl
             return Task.FromResult(firstFoundFile.FullName);
         }
 
-        public Task<IEnumerable<MediaInfoDto>> GetAllVideoFileInfosAsync(CancellationToken cancellationToken) =>
-            Task.FromResult(_searchDirectory.GetFiles("*.*", SearchOption.AllDirectories)
-                                            .Where(x => _fileExtensions.Contains(x.Extension))
-                                            .Select(y => new MediaInfoDto
-                                            {
-                                                Name = Path.GetFileNameWithoutExtension(y.Name),
-                                                FullName = y.Name,
-                                                Descriptions = $"Some file description. FullName: {y.FullName}, CreationTime: {y.CreationTime}",
-                                                PreviewImage = _testPreviewImage
-                                            }));
+        //ToDo think about more asynchrony with IAsyncResult
+        public async Task<IEnumerable<MediaInfoDto>> GetAllVideoFileInfosAsync(CancellationToken cancellationToken) =>
+            await Task.Run(() =>
+            {
+                return _searchDirectory.GetFiles("*.*", SearchOption.AllDirectories)
+                                       .Where(x => _fileExtensions.Contains(x.Extension))
+                                       //ToDo add pagination
+                                       .Take(8)
+                                       .Select(y => new MediaInfoDto
+                                       {
+                                           Name = Path.GetFileNameWithoutExtension(y.Name),
+                                           FullName = y.Name,
+                                           CreationTime = y.CreationTimeUtc
+                                               .ToLocalTime()
+                                               .ToString("MM/dd/yyyy HH:mm:ss"),
+                                           PreviewImage = _testPreviewImage
+                                       }).ToList();
+            }, cancellationToken);
     }
 }

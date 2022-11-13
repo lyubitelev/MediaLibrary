@@ -19,11 +19,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MediaListComponent } from './media-list/media-list.component';
 import { HttpClientModule } from '@angular/common/http';
+import { MediaPlayerComponent } from './media-player/media-player.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    MediaListComponent
+    MediaListComponent,
+    MediaPlayerComponent
   ],
   imports: [
     BrowserModule,
