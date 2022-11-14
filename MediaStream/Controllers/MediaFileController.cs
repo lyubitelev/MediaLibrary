@@ -1,5 +1,5 @@
-﻿using System.Net;
-using MediaStream.Interfaces;
+﻿using MediaStream.Interfaces;
+using MediaStream.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediaStream.Controllers
@@ -13,23 +13,25 @@ namespace MediaStream.Controllers
 
         public MediaFileController(IMediaFileRepository mediaFileRepository, ILogger<MediaStreamController> logger)
         {
-            _mediaFileRepository = mediaFileRepository;
-            _logger = logger;
+            _mediaFileRepository = mediaFileRepository ?? throw new InvalidOperationException();
+            _logger = logger ?? throw new InvalidOperationException();
         }
 
-        [HttpGet]
-        [Route("GetAllVideoFileInfos")]
-        public async Task<IActionResult> GetAllVideoFileInfos(CancellationToken cancellationToken)
+        [HttpGet("[action]/{fileName?}")]
+        public async Task<IActionResult> GetAllVideoFileInfos(CancellationToken cancellationToken, string? fileName = null)
         {
             try
             {
-                return Ok(await _mediaFileRepository.GetAllVideoFileInfosAsync(cancellationToken));
+                return Ok(await _mediaFileRepository.GetAllVideoFileInfosAsync(new SearchMediaFilterDto
+                {
+                    FileName = fileName!
+                }, cancellationToken));
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Get all video file infos got error");
 
-                return StatusCode((int)HttpStatusCode.InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }

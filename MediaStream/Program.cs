@@ -4,11 +4,6 @@ using MediaStream.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.ConfigureEndpointDefaults(_ => { });
-});
-
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 
 // Add services to the container.

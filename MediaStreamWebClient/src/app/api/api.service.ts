@@ -8,14 +8,24 @@ import Settings from '../../assets/settings.json';
   providedIn: 'root'
 })
 export class ApiService {
-  
+
   constructor(private http: HttpClient) { }
 
-  public GetAllMediaAsync(): Observable<MediaInfoDto[]> {
-    return this.http.get<MediaInfoDto[]>(`${Settings.apiUrl}/MediaFile/GetAllVideoFileInfos`);
+  public GetAllMediaAsync(fileName?: string): Observable<MediaInfoDto[]> {
+    const searchApiPath = fileName
+      ? `${Settings.apiUrl}/MediaFile/GetAllVideoFileInfos/${this.encodeURIComponent(fileName!)}`
+      : `${Settings.apiUrl}/MediaFile/GetAllVideoFileInfos/`;
+
+    return this.http.get<MediaInfoDto[]>(searchApiPath);
   }
 
   public GetMediaStreamUrl(fileName: string): string {
-    return `${Settings.apiUrl}/MediaStream/GetMediaStream/${decodeURIComponent(fileName)}`;
+    return `${Settings.apiUrl}/MediaStream/GetMediaStream/${this.encodeURIComponent(fileName)}`;
+  }
+
+  private encodeURIComponent(stringValue: string) {
+    return encodeURIComponent(stringValue).replace(/[!'()*]/g, function (c) {
+      return `%${c.charCodeAt(0).toString(16)}`;
+    });
   }
 }

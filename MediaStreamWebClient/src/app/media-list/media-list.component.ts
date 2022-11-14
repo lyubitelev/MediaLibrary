@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../api/api.service';
 import { MediaInfoDto } from '../models/media-info';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-media-list',
@@ -10,16 +11,14 @@ import { Router } from '@angular/router';
 })
 export class MediaListComponent implements OnInit {
   breakpoint!: number;
-  mediaInfos!: MediaInfoDto[];
+  searchText!: string;
+  mediaInfos!: Observable<MediaInfoDto[]>;
 
   constructor(private apiService: ApiService,
               private router: Router) { }
 
   ngOnInit(): void {
-    this.apiService.GetAllMediaAsync().subscribe(mediaInfos => {
-      this.mediaInfos = mediaInfos;
-    });
-
+    this.search();
     this.setBreakpoint();
   }
 
@@ -29,6 +28,10 @@ export class MediaListComponent implements OnInit {
 
   play(url: string) {
     this.router.navigate(['play', url]);
+  }
+
+  search() {
+    this.mediaInfos = this.apiService.GetAllMediaAsync(this.searchText);
   }
 
   private setBreakpoint(): void {

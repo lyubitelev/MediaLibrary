@@ -14,17 +14,12 @@
   </mat-toolbar>
 
   <mat-sidenav-container class="nav-container">
-    <mat-sidenav #sidenav mode="over" [opened]="false" class="nav-sidenav" [fixedInViewport]="options.value.fixed"
-      [fixedTopGap]="options.value.top" [fixedBottomGap]="options.value.bottom">
-      {{options.value.fixed ? 'Fixed' : 'Non-fixed'}} Sidenav
+    <mat-sidenav #sidenav mode="over" [opened]="false" class="nav-sidenav">
+      featureMenu
     </mat-sidenav>
 
     <mat-sidenav-content>
       <router-outlet></router-outlet>
     </mat-sidenav-content>
   </mat-sidenav-container>
-
-  <mat-toolbar color="primary" class="nav-footer">
-    <!-- someText -->
-  </mat-toolbar>
 </ng-container>

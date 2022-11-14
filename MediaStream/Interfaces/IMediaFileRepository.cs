@@ -6,6 +6,7 @@ namespace MediaStream.Interfaces
     {
         Task<string> GetFullPathByNameAsync(string fileName, CancellationToken cancellationToken);
 
-        Task<IEnumerable<MediaInfoDto>> GetAllVideoFileInfosAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<MediaInfoDto>> GetAllVideoFileInfosAsync(SearchMediaFilterDto mediaFilterDto,
+                                                                  CancellationToken cancellationToken);
     }
 }

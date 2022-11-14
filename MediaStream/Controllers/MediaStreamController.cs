@@ -1,5 +1,4 @@
-﻿using System.Net;
-using MediaStream.Interfaces;
+﻿using MediaStream.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 
@@ -7,24 +6,22 @@ namespace MediaStream.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class MediaStreamController : ControllerBase, IDisposable
+    public class MediaStreamController : ControllerBase
     {
-        private readonly FileExtensionContentTypeProvider _fileExtensionContentTypeProvider;
         private readonly IMediaFileRepository _mediaFileRepository;
         private readonly ILogger<MediaStreamController> _logger;
+        private readonly FileExtensionContentTypeProvider _fileExtensionContentTypeProvider;
         private const string DefaultContentType = "video/webm";
-
-        private FileStream? _localFileStream;
 
         public MediaStreamController(IMediaFileRepository mediaFileRepository, ILogger<MediaStreamController> logger)
         {
-            _mediaFileRepository = mediaFileRepository;
+            _mediaFileRepository = mediaFileRepository ?? throw new InvalidOperationException();
+            _logger = logger ?? throw new InvalidOperationException();
+
             _fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
-            _logger = logger;
         }
 
-        [HttpGet]
-        [Route("GetMediaStream/{fileName}")]
+        [HttpGet("[action]/{fileName}")]
         public async Task<IActionResult> GetMediaStream(string fileName, CancellationToken cancellationToken)
         {
             try
@@ -33,33 +30,24 @@ namespace MediaStream.Controllers
 
                 var filePath = await _mediaFileRepository.GetFullPathByNameAsync(fileName, cancellationToken);
 
-                _localFileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-
                 var discoveredContentType = _fileExtensionContentTypeProvider.TryGetContentType(filePath, out var contentType)
                     ? contentType
                     : DefaultContentType;
 
-                return File(_localFileStream, discoveredContentType, true);
+                return File(new FileStream(filePath, FileMode.Open, FileAccess.Read), discoveredContentType, true);
             }
             catch (FileNotFoundException e)
             {
                 _logger.LogError(e, "File search failed");
 
-                return StatusCode((int)HttpStatusCode.NotFound);
+                return StatusCode(StatusCodes.Status404NotFound);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Get media stream got error");
 
-                return StatusCode((int)HttpStatusCode.InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-        }
-
-        public void Dispose()
-        {
-            _localFileStream?.Dispose();
-
-            GC.SuppressFinalize(this);
         }
     }
 }
