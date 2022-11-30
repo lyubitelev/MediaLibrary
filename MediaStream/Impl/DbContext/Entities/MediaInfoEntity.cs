@@ -1,4 +1,4 @@
-﻿namespace MediaStream.DbContext.Entities
+﻿namespace MediaStream.Impl.DbContext.Entities
 {
     public class MediaInfoEntity : BaseEntity
     {

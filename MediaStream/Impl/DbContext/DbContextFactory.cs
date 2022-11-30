@@ -1,8 +1,8 @@
-﻿using MediaStream.Interfaces;
+﻿using MediaStream.Interfaces.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace MediaStream.DbContext
+namespace MediaStream.Impl.DbContext
 {
     public class DbContextFactory : IDbContextFactory
     {

@@ -1,10 +1,10 @@
 ﻿using MediaStream.Constants;
-using MediaStream.DbContext.Entities;
-using MediaStream.Interfaces;
+using MediaStream.Impl.DbContext.Entities;
+using MediaStream.Interfaces.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Xabe.FFmpeg;
 
-namespace MediaStream.DbContext
+namespace MediaStream.Impl.DbContext
 {
     public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext, IDbContext
     {

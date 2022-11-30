@@ -1,7 +1,7 @@
-﻿using MediaStream.DbContext.Entities;
+﻿using MediaStream.Impl.DbContext.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediaStream.Interfaces
+namespace MediaStream.Interfaces.DbContext
 {
     public interface IDbContext : IDisposable
     {

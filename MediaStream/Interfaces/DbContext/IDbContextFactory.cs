@@ -1,4 +1,4 @@
-﻿namespace MediaStream.Interfaces
+﻿namespace MediaStream.Interfaces.DbContext
 {
     public interface IDbContextFactory
     {

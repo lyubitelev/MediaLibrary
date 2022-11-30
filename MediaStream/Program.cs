@@ -1,8 +1,9 @@
 using MediaStream;
-using MediaStream.DbContext;
 using MediaStream.Extensions;
 using MediaStream.Impl;
+using MediaStream.Impl.DbContext;
 using MediaStream.Interfaces;
+using MediaStream.Interfaces.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
