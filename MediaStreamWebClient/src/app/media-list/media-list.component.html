@@ -15,7 +15,7 @@
                 <mat-card-header>
                     <mat-card-title>{{mediaInfo.name}}</mat-card-title>
                 </mat-card-header>
-                <img mat-card-image src="{{mediaInfo.previewImage}}">
+                <img mat-card-image src="data:image/jpg;base64, {{mediaInfo.previewImage}}">
                 <mat-card-content>
                     <span>Имя: {{mediaInfo.fullName}}</span>
                     <br>

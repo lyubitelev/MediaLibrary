@@ -1,13 +1,18 @@
 using MediaStream;
+using MediaStream.DbContext;
+using MediaStream.Extensions;
 using MediaStream.Impl;
 using MediaStream.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+FFmpegExtensions.DownloadFFmpeg();
+
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddSingleton<IDbContextFactory, DbContextFactory>();
 builder.Services.AddTransient<IMediaFileRepository, MediaFileRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -26,6 +31,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.Services.GetRequiredService<IDbContextFactory>()
+            .CreateContext();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,52 +1,63 @@
 ﻿using MediaStream.Constants;
 using MediaStream.Interfaces;
 using MediaStream.Models;
-using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediaStream.Impl
 {
     public class MediaFileRepository : IMediaFileRepository
     {
-        private readonly DirectoryInfo _searchDirectory;
-        
-        public MediaFileRepository(IOptions<AppSettings> appSettings)
+        private readonly IDbContextFactory _dbContextFactory;
+
+        public MediaFileRepository(IDbContextFactory dbContextFactory)
         {
-            _searchDirectory = new DirectoryInfo(appSettings.Value.SearchDirectory ?? throw new InvalidOperationException());
+            _dbContextFactory = dbContextFactory;
         }
 
-        public Task<string> GetFullPathByNameAsync(string fileName, CancellationToken cancellationToken)
-        {
-            var firstFoundFile = _searchDirectory.EnumerateFiles($"*{fileName}*.*", SearchOption.AllDirectories)
-                                                 .FirstOrDefault();
-
-            if (!MediaConstants.SupportedVideoExtensions.Contains(firstFoundFile?.Extension))
+        public Task<string> GetFullPathByNameAsync(string fileName, CancellationToken cancellationToken) =>
+            Task.Run(() =>
             {
-                throw new FileNotFoundException($"Matching files not found, {nameof(fileName)}: {fileName}");
-            }
-            
-            return Task.FromResult(firstFoundFile!.FullName);
-        }
+                using (var dbContext = _dbContextFactory.CreateContext())
+                {
+                    var mediaInfo = dbContext.MediaInfos.FirstOrDefault(x => x.Name.Contains(fileName));
+
+                    if (mediaInfo == null || !MediaConstants.SupportedVideoExtensions.Contains(Path.GetExtension(mediaInfo.FullName)))
+                    {
+                        throw new FileNotFoundException($"Matching files not found, {nameof(fileName)}: {fileName}");
+                    }
+
+                    return mediaInfo.FullName;
+                }
+            }, cancellationToken);
 
         //ToDo think about more asynchrony with IAsyncResult
-        public async Task<IEnumerable<MediaInfoDto>> GetAllVideoFileInfosAsync(SearchMediaFilterDto mediaFilterDto, CancellationToken cancellationToken) =>
-            await Task.Run(() =>
+        public Task<IEnumerable<MediaInfoDto>> GetAllVideoFileInfosAsync(SearchMediaFilterDto mediaFilterDto, CancellationToken cancellationToken) =>
+            Task.Run(async () =>
             {
-                var searchFilePattern = string.IsNullOrEmpty(mediaFilterDto.FileName) ? "*.*" : $"*{mediaFilterDto.FileName}*.*";
+                using (var dbContext = _dbContextFactory.CreateContext())
+                {
+                    var query = string.IsNullOrEmpty(mediaFilterDto.FileName)
+                        ? dbContext.MediaInfos.AsQueryable()
+                        : dbContext.MediaInfos.Where(x => x.Name
+                                                           .ToLower()
+                                                           .Contains(mediaFilterDto.FileName
+                                                                                   .ToLower()));
 
-                return _searchDirectory.EnumerateFiles(searchFilePattern, SearchOption.AllDirectories)
-                                       .Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
-                                       //ToDo think about pagination
-                                       .Take(8)
-                                       .Select(y => new MediaInfoDto
-                                       {
-                                           Name = Path.GetFileNameWithoutExtension(y.Name),
-                                           FullName = y.Name,
-                                           CreationTime = y.CreationTimeUtc.ToLocalTime()
-                                                                           .ToString("MM/dd/yyyy HH:mm:ss"),
-                                           //ToDo need added previewImage
-                                           //PreviewImage = 
-                                       })
-                                       .ToList();
+                    var mediaInfos = await query.Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
+                                                .Select(y => new MediaInfoDto
+                                                {
+                                                    Id = y.Id,
+                                                    Name = y.Name,
+                                                    FullName = y.FullName,
+                                                    CreationTime = y.CreationTime.ToLocalTime()
+                                                                                 .ToString("MM/dd/yyyy HH:mm:ss"),
+                                                    PreviewImage = y.PreviewImage
+                                                })
+                                                .OrderBy(x => x.FullName)
+                                                .ToListAsync(cancellationToken);
+
+                    return mediaInfos.AsEnumerable();
+                }
             }, cancellationToken);
     }
 }
