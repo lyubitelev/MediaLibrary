@@ -34,6 +34,9 @@ namespace MediaStream.Controllers
                     ? contentType
                     : DefaultContentType;
 
+
+                _logger.LogInformation($"Discovered content type {nameof(discoveredContentType)}: {discoveredContentType} by {nameof(filePath)}:{filePath}");
+
                 return File(new FileStream(filePath, FileMode.Open, FileAccess.Read), discoveredContentType, true);
             }
             catch (FileNotFoundException e)

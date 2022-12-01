@@ -44,16 +44,26 @@ namespace MediaStream.Impl.DbContext
         {
             var allMediaFiles = _seedDirectory.EnumerateFiles("*.*", SearchOption.AllDirectories)
                                               .Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
-                                              .Select(async y => new MediaInfoEntity
+                                              .Select(async y =>
                                               {
-                                                  LastViewedMin = 0,
-                                                  IsDeleted = false,
-                                                  Id = Guid.NewGuid(),
-                                                  Name = Path.GetFileNameWithoutExtension(y.Name),
-                                                  FullName = y.FullName,
-                                                  Extension = Path.GetExtension(y.FullName),
-                                                  CreationTime = y.CreationTimeUtc.ToLocalTime(),
-                                                  PreviewImage = await GetPreviewImageBytesAsync(y.FullName)
+                                                  var id = Guid.NewGuid();
+                                                  var theme = y.Directory!.Name;
+                                                  var extension = Path.GetExtension(y.FullName);
+                                                  var name = Path.GetFileNameWithoutExtension(y.Name);
+
+                                                  return new MediaInfoEntity
+                                                  {
+                                                      Id = id,
+                                                      Name = name,
+                                                      Theme = theme,
+                                                      LastViewedMin = 0,
+                                                      IsDeleted = false,
+                                                      FullName = y.FullName,
+                                                      Extension = extension,
+                                                      CreationTime = y.CreationTimeUtc.ToLocalTime(),
+                                                      PreviewImage = await GetPreviewImageBytesAsync(y.FullName),
+                                                      FullSearchText = $"{id}; {name}; {y.FullName}; {theme}".ToLower(),
+                                                  };
                                               })
                                               .ToList();
 

@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../api/api.service';
 import { MediaInfoDto } from '../models/media-info';
 import { Router } from '@angular/router';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
+import { MediaPlayerDialog } from '../media-player-dialog/media-player.dialog';
 
 @Component({
   selector: 'app-media-list',
@@ -15,7 +17,8 @@ export class MediaListComponent implements OnInit {
   mediaInfos!: Observable<MediaInfoDto[]>;
 
   constructor(private apiService: ApiService,
-              private router: Router) { }
+    private router: Router,
+    public dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.search();
@@ -32,6 +35,19 @@ export class MediaListComponent implements OnInit {
 
   search() {
     this.mediaInfos = this.apiService.GetAllMediaAsync(this.searchText);
+  }
+
+  openDialog(id: string, name: string): void {
+    const dialogRef = this.dialog.open(MediaPlayerDialog, {
+      width: '1200px',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      data: {id: id, name: name},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+
+    });
   }
 
   private setBreakpoint(): void {

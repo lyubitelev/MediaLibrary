@@ -12,16 +12,19 @@
     <mat-grid-list [cols]="breakpoint" rowHeight="1:1" (window:resize)="onResize($event)">
         <mat-grid-tile *ngFor="let mediaInfo of mediaInfos | async">
             <mat-card class="media-card truncate">
-                <span>{{mediaInfo.name}}</span>
+                <span class="span-bold">{{mediaInfo.name}}</span>
+                <br>
                 <img mat-card-image src="data:image/jpg;base64, {{mediaInfo.previewImage}}">
-                <mat-card-content>
-                    <!-- <span>Имя: {{mediaInfo.fullName}}</span> -->
+                <mat-card-content class="truncate">
+                    <span class="span-bold">ID: </span>{{mediaInfo.id}}
                     <br>
-                    <span>Дата добавления: {{mediaInfo.creationTime}}</span>
+                    <span class="span-bold">Тема: </span>{{mediaInfo.theme}}
+                    <br>
+                    <span class="span-bold">Дата добавления: </span>{{mediaInfo.creationTime}}
                 </mat-card-content>
                 <mat-card-actions>
                     <div class="media-container">
-                        <button (click)="play(mediaInfo.name)" mat-icon-button color="primary">
+                        <button (click)="openDialog(mediaInfo.id, mediaInfo.name)" mat-icon-button color="primary">
                             <mat-icon>play_circle_outline</mat-icon>
                         </button>
                         <div class="media-fill"></div>

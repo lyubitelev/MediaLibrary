@@ -20,14 +20,18 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MediaListComponent } from './media-list/media-list.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MediaPlayerComponent } from './media-player/media-player.component';
+import { MediaPlayerDialog } from './media-player-dialog/media-player.dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
     AppComponent,
     MediaListComponent,
-    MediaPlayerComponent
+    MediaPlayerComponent,
+    MediaPlayerDialog
   ],
   imports: [
+    MatDialogModule,
     BrowserModule,
     HttpClientModule,
     FormsModule,
@@ -48,7 +52,6 @@ import { MediaPlayerComponent } from './media-player/media-player.component';
     MatCardModule,
     MatMenuModule
   ],
-  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

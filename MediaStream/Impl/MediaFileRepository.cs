@@ -40,17 +40,19 @@ namespace MediaStream.Impl
 
                 var query = string.IsNullOrEmpty(mediaFilterDto.FileName)
                     ? dbContext.MediaInfos
-                    : dbContext.MediaInfos.Where(x => x.Name.ToLower().Contains(fileName!));
+                    : dbContext.MediaInfos.Where(x => x.FullSearchText.Contains(fileName!));
                 
-                foreach (var mediaInfo in await query.Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
-                                                     .OrderBy(x => x.FullName)
-                                                     .Take(8)
+                foreach (var mediaInfo in await query.Where(x => !x.IsDeleted && MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
+                                                     .OrderBy(x => x.Theme)
+                                                     //ToDo lazy load or pagination
+                                                     .Take(50)
                                                      .ToListAsync(cancellationToken))
                 {
                     yield return new MediaInfoDto
                     {
                         Id = mediaInfo.Id,
                         Name = mediaInfo.Name,
+                        Theme = mediaInfo.Theme,
                         FullName = mediaInfo.FullName,
                         PreviewImage = mediaInfo.PreviewImage,
                         CreationTime = mediaInfo.CreationTime.ToLocalTime().ToString("MM/dd/yyyy HH:mm:ss")
