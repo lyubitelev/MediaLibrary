@@ -8,16 +8,14 @@
             </button>
         </mat-form-field>
     </form>
-    
+    <br>
     <mat-grid-list [cols]="breakpoint" rowHeight="1:1" (window:resize)="onResize($event)">
         <mat-grid-tile *ngFor="let mediaInfo of mediaInfos | async">
-            <mat-card class="media-card">
-                <mat-card-header>
-                    <mat-card-title>{{mediaInfo.name}}</mat-card-title>
-                </mat-card-header>
+            <mat-card class="media-card truncate">
+                <span>{{mediaInfo.name}}</span>
                 <img mat-card-image src="data:image/jpg;base64, {{mediaInfo.previewImage}}">
                 <mat-card-content>
-                    <span>Имя: {{mediaInfo.fullName}}</span>
+                    <!-- <span>Имя: {{mediaInfo.fullName}}</span> -->
                     <br>
                     <span>Дата добавления: {{mediaInfo.creationTime}}</span>
                 </mat-card-content>

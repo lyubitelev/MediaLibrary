@@ -20,6 +20,11 @@ namespace MediaStream.Impl.DbContext
             _seedDirectory = new DirectoryInfo(mediaDirectory);
             _needSeedingDb = needSeedingDb;
 
+            if (_needSeedingDb)
+            {
+                Database.EnsureDeleted();
+            }
+            
             Database.EnsureCreated();
         }
 
@@ -32,35 +37,42 @@ namespace MediaStream.Impl.DbContext
         {
             if (!_needSeedingDb) return;
 
+            Task.Run(() => SeedDbAsync(modelBuilder)).Wait();
+        }
+
+        private async Task SeedDbAsync(ModelBuilder modelBuilder)
+        {
             var allMediaFiles = _seedDirectory.EnumerateFiles("*.*", SearchOption.AllDirectories)
                                               .Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
-                                              .Select(y => new MediaInfoEntity
+                                              .Select(async y => new MediaInfoEntity
                                               {
+                                                  LastViewedMin = 0,
+                                                  IsDeleted = false,
                                                   Id = Guid.NewGuid(),
                                                   Name = Path.GetFileNameWithoutExtension(y.Name),
                                                   FullName = y.FullName,
                                                   Extension = Path.GetExtension(y.FullName),
                                                   CreationTime = y.CreationTimeUtc.ToLocalTime(),
-                                                  PreviewImage = GetPreviewImageBytes(y.FullName),
-                                                  LastViewedMin = 0,
-                                                  IsDeleted = false
+                                                  PreviewImage = await GetPreviewImageBytesAsync(y.FullName)
                                               })
                                               .ToList();
 
-            modelBuilder.Entity<MediaInfoEntity>().HasData(allMediaFiles);
+            await Task.WhenAll(allMediaFiles);
+
+            modelBuilder.Entity<MediaInfoEntity>().HasData(allMediaFiles.Select(x => x.Result).ToList());
         }
 
-        private static byte[] GetPreviewImageBytes(string fullName)
+        private static async Task<byte[]> GetPreviewImageBytesAsync(string fullName)
         {
             var outputPreviewImage = Path.Combine(AppContext.BaseDirectory, "PngResult", Guid.NewGuid() + ".png");
 
-            var conversionTask = FFmpeg.Conversions
-                                       .FromSnippet
-                                       .Snapshot(fullName, outputPreviewImage, TimeSpan.FromSeconds(25));
+            var conversion = await FFmpeg.Conversions
+                                         .FromSnippet
+                                         .Snapshot(fullName, outputPreviewImage, TimeSpan.FromSeconds(25));
 
-            conversionTask.Result.Start().Wait();
+            await conversion.Start();
 
-            var bytes = File.ReadAllBytes(outputPreviewImage);
+            var bytes = await File.ReadAllBytesAsync(outputPreviewImage);
 
             if (File.Exists(outputPreviewImage))
             {

@@ -36,12 +36,15 @@ namespace MediaStream.Impl
         {
             using (var dbContext = _dbContextFactory.CreateContext())
             {
+                var fileName = mediaFilterDto.FileName?.ToLower();
+
                 var query = string.IsNullOrEmpty(mediaFilterDto.FileName)
-                    ? dbContext.MediaInfos.AsQueryable()
-                    : dbContext.MediaInfos.Where(x => x.Name.ToLower().Contains(mediaFilterDto.FileName.ToLower()));
+                    ? dbContext.MediaInfos
+                    : dbContext.MediaInfos.Where(x => x.Name.ToLower().Contains(fileName!));
                 
                 foreach (var mediaInfo in await query.Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
                                                      .OrderBy(x => x.FullName)
+                                                     .Take(8)
                                                      .ToListAsync(cancellationToken))
                 {
                     yield return new MediaInfoDto
@@ -49,8 +52,8 @@ namespace MediaStream.Impl
                         Id = mediaInfo.Id,
                         Name = mediaInfo.Name,
                         FullName = mediaInfo.FullName,
-                        CreationTime = mediaInfo.CreationTime.ToLocalTime().ToString("MM/dd/yyyy HH:mm:ss"),
-                        PreviewImage = mediaInfo.PreviewImage
+                        PreviewImage = mediaInfo.PreviewImage,
+                        CreationTime = mediaInfo.CreationTime.ToLocalTime().ToString("MM/dd/yyyy HH:mm:ss")
                     };
                 }
             }
