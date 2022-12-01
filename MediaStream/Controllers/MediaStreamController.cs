@@ -39,14 +39,12 @@ namespace MediaStream.Controllers
             catch (FileNotFoundException e)
             {
                 _logger.LogError(e, "File search failed");
-
-                return StatusCode(StatusCodes.Status404NotFound);
+                throw;
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Get media stream got error");
-
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                throw;
             }
         }
     }
