@@ -1,0 +1,42 @@
+<ng-container>
+    <form class="media-form">
+        <mat-form-field class="media-full-width" appearance="fill">
+            <mat-label>Search</mat-label>
+            <input matInput type="text" [(ngModel)]="searchText" [ngModelOptions]="{standalone: true}">
+            <button (click)="search()" mat-mini-fab color="basic" matSuffix>
+                <mat-icon>search</mat-icon>
+            </button>
+        </mat-form-field>
+    </form>
+    <br>
+    <mat-grid-list [cols]="breakpoint" rowHeight="1:1" (window:resize)="onResize($event)">
+        <mat-grid-tile *ngFor="let mediaInfo of mediaInfos | async">
+            <mat-card class="media-card truncate">
+                <span class="span-bold">{{mediaInfo.name}}</span>
+                <br>
+                <img mat-card-image src="data:image/jpg;base64, {{mediaInfo.previewImage}}">
+                <mat-card-content class="truncate">
+                    <span class="span-bold">ID: </span>{{mediaInfo.id}}
+                    <br>
+                    <span class="span-bold">Тема: </span>{{mediaInfo.theme}}
+                    <br>
+                    <span class="span-bold">Дата добавления: </span>{{mediaInfo.creationTime}}
+                </mat-card-content>
+                <mat-card-actions>
+                    <div class="media-container">
+                        <button (click)="openDialog(mediaInfo.id, mediaInfo.name)" mat-icon-button color="primary">
+                            <mat-icon>play_circle_outline</mat-icon>
+                        </button>
+                        <div class="media-fill"></div>
+                        <button mat-icon-button class="favorite-icon">
+                            <mat-icon>favorite</mat-icon>
+                        </button>
+                        <button mat-icon-button>
+                            <mat-icon>share</mat-icon>
+                        </button>
+                    </div>
+                </mat-card-actions>
+            </mat-card>
+        </mat-grid-tile>
+    </mat-grid-list>
+</ng-container>

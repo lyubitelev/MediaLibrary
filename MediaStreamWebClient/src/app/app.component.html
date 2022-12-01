@@ -1,0 +1,25 @@
+<ng-container>
+  <mat-toolbar color="primary" class="nav-header">
+    <button mat-icon-button (click)="sidenav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <span>{{title}}</span>
+    <span class="nav-spacer"></span>
+    <button mat-icon-button class="favorite-icon">
+      <mat-icon>favorite</mat-icon>
+    </button>
+    <button mat-icon-button>
+      <mat-icon>share</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="nav-container">
+    <mat-sidenav #sidenav mode="over" [opened]="false" class="nav-sidenav">
+      featureMenu
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</ng-container>
