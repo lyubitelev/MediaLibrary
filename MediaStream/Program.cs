@@ -1,5 +1,6 @@
 using MediaStream;
 using MediaStream.Extensions;
+using MediaStream.Helpers;
 using MediaStream.Impl;
 using MediaStream.Impl.DbContext;
 using MediaStream.Interfaces;
@@ -33,8 +34,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.Services.GetRequiredService<IDbContextFactory>()
-            .CreateContext();
+app.ReloadDbIfNeeded();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
