@@ -2,74 +2,71 @@
 using MediaStream.Impl.DbContext.Entities;
 using MediaStream.Interfaces.DbContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Xabe.FFmpeg;
 
 namespace MediaStream.Impl.DbContext
 {
     public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext, IDbContext
     {
-        private readonly DirectoryInfo _seedDirectory;
-        private readonly bool _needSeedingDb;
+        private static DirectoryInfo? _seedDirectory;
+        private static bool _needSeedingDb;
 
         public DbSet<MediaInfoEntity> MediaInfos { get; set; }
 
-        public DbContext(DbContextOptions dBContextOptions, 
-                         string mediaDirectory, 
-                         bool needSeedingDb = false) : base(dBContextOptions)
+        public DbContext(DbContextOptions dBContextOptions,
+                         IOptions<AppSettings> options) : base(dBContextOptions)
         {
-            _seedDirectory = new DirectoryInfo(mediaDirectory);
-            _needSeedingDb = needSeedingDb;
-
-            if (_needSeedingDb)
+            if (!Directory.Exists(options.Value.SearchDirectory) && options.Value.NeedSeedingDb)
             {
-                Database.EnsureDeleted();
+                throw new DirectoryNotFoundException($"Directory {nameof(options.Value.SearchDirectory)} not found. Full path: {options.Value.SearchDirectory}");
             }
-            
-            Database.EnsureCreated();
+
+            ReloadDbIfNeeded(options);
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             SQLitePCL.Batteries.Init();
-        }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+            Task.Run(() => SeedDbIfNeededAsync(modelBuilder)).Wait();
+
+        private static async Task SeedDbIfNeededAsync(ModelBuilder modelBuilder)
         {
             if (!_needSeedingDb) return;
 
-            Task.Run(() => SeedDbAsync(modelBuilder)).Wait();
-        }
+            var allMediaFiles = _seedDirectory?.EnumerateFiles("*.*", SearchOption.AllDirectories)
+                                               .Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
+                                               .Select(async y =>
+                                               {
+                                                   var id = Guid.NewGuid();
+                                                   var theme = y.Directory!.Name;
+                                                   var extension = Path.GetExtension(y.FullName);
+                                                   var name = Path.GetFileNameWithoutExtension(y.Name);
 
-        private async Task SeedDbAsync(ModelBuilder modelBuilder)
-        {
-            var allMediaFiles = _seedDirectory.EnumerateFiles("*.*", SearchOption.AllDirectories)
-                                              .Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
-                                              .Select(async y =>
-                                              {
-                                                  var id = Guid.NewGuid();
-                                                  var theme = y.Directory!.Name;
-                                                  var extension = Path.GetExtension(y.FullName);
-                                                  var name = Path.GetFileNameWithoutExtension(y.Name);
+                                                   return new MediaInfoEntity
+                                                   {
+                                                       Id = id,
+                                                       Name = name,
+                                                       Theme = theme,
+                                                       LastViewedMin = 0,
+                                                       IsDeleted = false,
+                                                       FullName = y.FullName,
+                                                       Extension = extension,
+                                                       CreationTime = y.CreationTimeUtc.ToLocalTime(),
+                                                       PreviewImage = await GetPreviewImageBytesAsync(y.FullName),
+                                                       FullSearchText = $"{id}; {name}; {y.FullName}; {theme}".ToLower(),
+                                                   };
+                                               })
+                                               .ToList();
 
-                                                  return new MediaInfoEntity
-                                                  {
-                                                      Id = id,
-                                                      Name = name,
-                                                      Theme = theme,
-                                                      LastViewedMin = 0,
-                                                      IsDeleted = false,
-                                                      FullName = y.FullName,
-                                                      Extension = extension,
-                                                      CreationTime = y.CreationTimeUtc.ToLocalTime(),
-                                                      PreviewImage = await GetPreviewImageBytesAsync(y.FullName),
-                                                      FullSearchText = $"{id}; {name}; {y.FullName}; {theme}".ToLower(),
-                                                  };
-                                              })
-                                              .ToList();
+            allMediaFiles ??= new List<Task<MediaInfoEntity>>();
 
             await Task.WhenAll(allMediaFiles);
 
             modelBuilder.Entity<MediaInfoEntity>().HasData(allMediaFiles.Select(x => x.Result).ToList());
+
+            _needSeedingDb = false;
         }
 
         private static async Task<byte[]> GetPreviewImageBytesAsync(string fullName)
@@ -90,6 +87,21 @@ namespace MediaStream.Impl.DbContext
             }
 
             return bytes;
+        }
+
+        private void ReloadDbIfNeeded(IOptions<AppSettings> options)
+        {
+            if (options.Value.NeedSeedingDb)
+            {
+                Database.EnsureDeleted();
+
+                _needSeedingDb = true;
+                _seedDirectory = new DirectoryInfo(options.Value.SearchDirectory);
+
+                options.Value.NeedSeedingDb = false;
+            }
+
+            Database.EnsureCreated();
         }
     }
 }
