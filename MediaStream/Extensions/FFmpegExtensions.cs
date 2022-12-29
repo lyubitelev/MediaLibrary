@@ -18,6 +18,7 @@ namespace MediaStream.Extensions
 
             FFmpeg.SetExecutablesPath(path);
 
+            // ToDo you need to add logging and verification for downloading
             FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, path)
                             .Wait();
         }

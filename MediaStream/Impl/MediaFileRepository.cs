@@ -44,8 +44,9 @@ namespace MediaStream.Impl
                 
                 foreach (var mediaInfo in await query.Where(x => !x.IsDeleted && MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
                                                      .OrderBy(x => x.Theme)
+                                                     .ThenBy(x => x.Name)
                                                      //ToDo lazy load or pagination
-                                                     .Take(50)
+                                                     //.Take(50)
                                                      .ToListAsync(cancellationToken))
                 {
                     yield return new MediaInfoDto

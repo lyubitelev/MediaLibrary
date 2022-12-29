@@ -6,19 +6,17 @@ namespace MediaStream.Impl.DbContext
 {
     public class DbContextFactory : IDbContextFactory
     {
-        private readonly AppSettings _appSettings;
+        private readonly IOptions<AppSettings> _options;
 
-        public DbContextFactory(IOptions<AppSettings> options)
-        {
-            _appSettings = options.Value;
-        }
+        public DbContextFactory(IOptions<AppSettings> options) =>
+            _options = options;
 
         public IDbContext CreateContext()
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder();
-            dbContextOptionsBuilder.UseSqlite($"Filename={Path.Combine(AppContext.BaseDirectory, $"{_appSettings.DbFileName}.db")}");
+            dbContextOptionsBuilder.UseSqlite($"Filename={Path.Combine(AppContext.BaseDirectory, $"{_options.Value.DbFileName}.db")}");
 
-            return new DbContext(dbContextOptionsBuilder.Options, _appSettings.SearchDirectory, _appSettings.NeedSeedingDb);
+            return new DbContext(dbContextOptionsBuilder.Options, _options);
         }
     }
 }
