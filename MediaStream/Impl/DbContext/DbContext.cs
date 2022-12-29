@@ -15,15 +15,8 @@ namespace MediaStream.Impl.DbContext
         public DbSet<MediaInfoEntity> MediaInfos { get; set; }
 
         public DbContext(DbContextOptions dBContextOptions, 
-                         IOptions<AppSettings> options) : base(dBContextOptions)
-        {
-            if (!Directory.Exists(options.Value.SearchDirectory) && options.Value.NeedSeedingDb)
-            {
-                throw new DirectoryNotFoundException($"Directory {nameof(options.Value.SearchDirectory)} not found. Full path: {options.Value.SearchDirectory}");
-            }
-            
+                         IOptions<AppSettings> options) : base(dBContextOptions) =>
             ReloadDbIfNeeded(options);
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             SQLitePCL.Batteries.Init();
@@ -96,7 +89,9 @@ namespace MediaStream.Impl.DbContext
                 Database.EnsureDeleted();
 
                 _needSeedingDb = true;
-                _seedDirectory = new DirectoryInfo(options.Value.SearchDirectory);
+                _seedDirectory = Directory.Exists(options.Value.SearchDirectory) 
+                    ? new DirectoryInfo(options.Value.SearchDirectory) 
+                    : throw new DirectoryNotFoundException($"Directory {nameof(options.Value.SearchDirectory)} not found. Full path: {options.Value.SearchDirectory}"); ;
 
                 options.Value.NeedSeedingDb = false;
             }
