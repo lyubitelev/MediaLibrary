@@ -36,17 +36,26 @@ namespace MediaStream.Impl.DbContext
                                                   var theme = y.Directory!.Name;
                                                   var extension = Path.GetExtension(y.FullName);
                                                   var name = Path.GetFileNameWithoutExtension(y.Name);
+                                                  var output = Path.Combine(y.DirectoryName!, Path.GetFileNameWithoutExtension(name) + ".mp4");
+                                                  
+                                                  if (extension.Contains("avi") && !File.Exists(output))
+                                                  {
+                                                      var conversion = FFmpeg.Conversions.New();
+                                                      await conversion.AddParameter($"-i {y.FullName} -c:v libx264 -crf 16 -preset slow -c:a aac -b:a 192k -ac 2 {output}")
+                                                                      .Start();
+                                                  }
 
                                                   return new MediaInfoEntity
                                                   {
                                                       Id = id,
                                                       Name = name,
                                                       Theme = theme,
+                                                      IsLiked = false,
                                                       LastViewedMin = 0,
                                                       IsDeleted = false,
-                                                      FullName = y.FullName,
                                                       Extension = extension,
                                                       CreationTime = y.CreationTimeUtc.ToLocalTime(),
+                                                      FullName = File.Exists(output) ? output : y.FullName,
                                                       PreviewImage = await GetPreviewImageBytesAsync(y.FullName),
                                                       FullSearchText = $"{id}; {name}; {y.FullName}; {theme}".ToLower(),
                                                   };

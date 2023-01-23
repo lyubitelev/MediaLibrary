@@ -21,7 +21,7 @@ namespace MediaStream.Impl
             using (var dbContext = _dbContextFactory.CreateContext())
             {
                 var mediaInfo = await dbContext.MediaInfos.FirstOrDefaultAsync(x => x.Name.Contains(fileName), cancellationToken);
-
+                
                 if (mediaInfo == null || !MediaConstants.SupportedVideoExtensions.Contains(Path.GetExtension(mediaInfo.FullName)))
                 {
                     throw new FileNotFoundException($"Matching files not found, {nameof(fileName)}: {fileName}");
@@ -54,11 +54,43 @@ namespace MediaStream.Impl
                         Id = mediaInfo.Id,
                         Name = mediaInfo.Name,
                         Theme = mediaInfo.Theme,
+                        IsLiked = mediaInfo.IsLiked,
                         FullName = mediaInfo.FullName,
                         PreviewImage = mediaInfo.PreviewImage,
                         CreationTime = mediaInfo.CreationTime.ToLocalTime().ToString("MM/dd/yyyy HH:mm:ss")
                     };
                 }
+            }
+        }
+
+        public async Task<MediaInfoDto?> MarkMediaAsLikesAsync(Guid id, CancellationToken cancellationToken) =>
+            await UpdateIsLikedFlag(id, true, cancellationToken);
+
+        public async Task<MediaInfoDto?> MarkMediaAsDislikedAsync(Guid id, CancellationToken cancellationToken) =>
+            await UpdateIsLikedFlag(id, false, cancellationToken);
+
+        private async Task<MediaInfoDto?> UpdateIsLikedFlag(Guid id, bool isLiked, CancellationToken cancellationToken)
+        {
+            using (var dbContext = _dbContextFactory.CreateContext())
+            {
+                var mediaInfo = await dbContext.MediaInfos.FindAsync(id);
+
+                if (mediaInfo == null) throw new KeyNotFoundException($"Media info not found by {nameof(id)}: {id}");
+
+                mediaInfo.IsLiked = isLiked;
+
+                await dbContext.SaveChangesAsync(cancellationToken);
+
+                return new MediaInfoDto
+                {
+                    Id = mediaInfo.Id,
+                    Name = mediaInfo.Name,
+                    Theme = mediaInfo.Theme,
+                    IsLiked = mediaInfo.IsLiked,
+                    FullName = mediaInfo.FullName,
+                    PreviewImage = mediaInfo.PreviewImage,
+                    CreationTime = mediaInfo.CreationTime.ToLocalTime().ToString("MM/dd/yyyy HH:mm:ss")
+                };
             }
         }
     }

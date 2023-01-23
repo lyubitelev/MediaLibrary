@@ -33,5 +33,43 @@ namespace MediaStream.Controllers
                 throw;
             }
         }
+
+        [HttpPost("[action]/{id}")]
+        public async Task<IActionResult> MarkMediaAsLikes(string id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.LogInformation($"Mark media as likes by id: {id}");
+
+                var guid = Guid.Parse(id);
+                var mediaInfoDto = await _mediaFileRepository.MarkMediaAsLikesAsync(guid, cancellationToken);
+
+                return Ok(mediaInfoDto);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Mark media as likes got error");
+                throw;
+            }
+        }
+
+        [HttpPost("[action]/{id}")]
+        public async Task<IActionResult> MarkMediaAsDisliked(string id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.LogInformation($"Mark media as disliked by id: {id}");
+
+                var guid = Guid.Parse(id);
+                var mediaInfoDto = await _mediaFileRepository.MarkMediaAsDislikedAsync(guid, cancellationToken);
+
+                return Ok(mediaInfoDto);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Mark media as likes got error");
+                throw;
+            }
+        }
     }
 }

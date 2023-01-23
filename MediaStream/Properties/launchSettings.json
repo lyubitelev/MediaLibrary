@@ -12,11 +12,11 @@
     "MediaStream": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "swagger",
+      "launchUrl": "https://localhost:5001/swagger/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://0.0.0.0:5000",
+      "applicationUrl": "https://localhost:5001/",
       "dotnetRunMessages": true
     },
     "IIS Express": {

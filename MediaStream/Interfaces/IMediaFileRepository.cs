@@ -8,5 +8,7 @@ namespace MediaStream.Interfaces
 
         IAsyncEnumerable<MediaInfoDto> GetAllVideoFileInfosAsync(SearchMediaFilterDto mediaFilterDto,
                                                                  CancellationToken cancellationToken);
+        Task<MediaInfoDto?> MarkMediaAsLikesAsync(Guid id, CancellationToken cancellationToken);
+        Task<MediaInfoDto?> MarkMediaAsDislikedAsync(Guid id, CancellationToken cancellationToken);
     }
 }
