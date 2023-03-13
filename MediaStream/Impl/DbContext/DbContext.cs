@@ -37,11 +37,15 @@ namespace MediaStream.Impl.DbContext
                                                   var extension = Path.GetExtension(y.FullName);
                                                   var name = Path.GetFileNameWithoutExtension(y.Name);
                                                   var output = Path.Combine(y.DirectoryName!, Path.GetFileNameWithoutExtension(name) + ".mp4");
-                                                  
-                                                  if (extension.Contains("avi") && !File.Exists(output))
+
+                                                  if (extension == ".mkv")
                                                   {
+                                                      //var command = $"-i {y.FullName} -c:v libx264 -crf 16 -preset slow -c:a aac -b:a 192k -ac 2 {output}";
+                                                      //var command = $"-i {y.FullName} -c:v libx264 -crf 20 -c:a aac {output}";
+                                                      //var command = $"-i {y.FullName} -vcodec copy -codec:a libmp3lame -qscale:a 2 {output}";
+                                                      var command = $"-i {y.FullName} -vcodec copy -c:a aac -b:a 192k -ac 2 {output}";
                                                       var conversion = FFmpeg.Conversions.New();
-                                                      await conversion.AddParameter($"-i {y.FullName} -c:v libx264 -crf 16 -preset slow -c:a aac -b:a 192k -ac 2 {output}")
+                                                      await conversion.AddParameter(command)
                                                                       .Start();
                                                   }
 
@@ -61,6 +65,10 @@ namespace MediaStream.Impl.DbContext
                                                   };
                                               })
                                               .ToList();
+
+            //var allMediaFiles = _seedDirectory?.EnumerateFiles("*.*", SearchOption.AllDirectories)
+            //                      .Where(x => MediaConstants.SupportedVideoExtensions.Contains(x.Extension))
+            //                      .ToList();
 
             allMediaFiles ??= new List<Task<MediaInfoEntity>>();
 

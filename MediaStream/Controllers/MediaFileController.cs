@@ -22,6 +22,7 @@ namespace MediaStream.Controllers
         {
             try
             {
+                _logger.LogInformation($"User agent connected: {HttpContext.Request.Headers["User-Agent"]}");
                 _logger.LogInformation($"Get all video file infos start by filter: {fileName}");
 
                 return _mediaFileRepository.GetAllVideoFileInfosAsync(new SearchMediaFilterDto { FileName = fileName! },

@@ -46,7 +46,7 @@ namespace MediaStream.Impl
                                                      .OrderBy(x => x.Theme)
                                                      .ThenBy(x => x.Name)
                                                      //ToDo lazy load or pagination
-                                                     //.Take(50)
+                                                     .Take(50)
                                                      .ToListAsync(cancellationToken))
                 {
                     yield return new MediaInfoDto

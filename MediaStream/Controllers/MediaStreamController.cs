@@ -1,6 +1,7 @@
 ﻿using MediaStream.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Xabe.FFmpeg;
 
 namespace MediaStream.Controllers
 {
@@ -33,7 +34,6 @@ namespace MediaStream.Controllers
                 var discoveredContentType = _fileExtensionContentTypeProvider.TryGetContentType(filePath, out var contentType)
                     ? contentType
                     : DefaultContentType;
-
 
                 _logger.LogInformation($"Discovered content type {nameof(discoveredContentType)}: {discoveredContentType} by {nameof(filePath)}:{filePath}");
 

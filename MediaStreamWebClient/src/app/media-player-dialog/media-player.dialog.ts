@@ -12,7 +12,6 @@ export class MediaPlayerDialog {
   constructor(private apiService: ApiService,
               public dialogRef: MatDialogRef<MediaPlayerDialog>,
               @Inject(MAT_DIALOG_DATA) public data: any) {
-    console.log(data);
     this.url = this.apiService.GetMediaStreamUrl(data.name);
   }
 
