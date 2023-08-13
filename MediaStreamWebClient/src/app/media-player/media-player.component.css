@@ -1,6 +1,6 @@
 video {
-    height: 87.7vh;
-    width: 100%;
+    height: auto;
+    width: auto;
     object-fit: contain;
     position: absolute;
 }

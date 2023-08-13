@@ -40,13 +40,20 @@ namespace MediaStream.Impl.DbContext
 
                                                   if (extension == ".mkv")
                                                   {
-                                                      //var command = $"-i {y.FullName} -c:v libx264 -crf 16 -preset slow -c:a aac -b:a 192k -ac 2 {output}";
-                                                      //var command = $"-i {y.FullName} -c:v libx264 -crf 20 -c:a aac {output}";
-                                                      //var command = $"-i {y.FullName} -vcodec copy -codec:a libmp3lame -qscale:a 2 {output}";
-                                                      var command = $"-i {y.FullName} -vcodec copy -c:a aac -b:a 192k -ac 2 {output}";
-                                                      var conversion = FFmpeg.Conversions.New();
-                                                      await conversion.AddParameter(command)
-                                                                      .Start();
+                                                      try
+                                                      {
+                                                          //var command = $"-i {y.FullName} -c:v libx264 -crf 16 -preset slow -c:a aac -b:a 192k -ac 2 {output}";
+                                                          //var command = $"-i {y.FullName} -c:v libx264 -crf 20 -c:a aac {output}";
+                                                          //var command = $"-i {y.FullName} -vcodec copy -codec:a libmp3lame -qscale:a 2 {output}";
+                                                          var command = $"-i \"{y.FullName}\" -vcodec copy -c:a aac -b:a 192k -ac 2 \"{output}\"";
+                                                          var conversion = FFmpeg.Conversions.New();
+                                                          await conversion.AddParameter(command)
+                                                                          .Start();
+                                                      }
+                                                      catch (Exception e)
+                                                      {
+                                                          Console.WriteLine(e);
+                                                      }
                                                   }
 
                                                   return new MediaInfoEntity
